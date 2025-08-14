@@ -194,7 +194,6 @@ def MergeFiles():
             out_second_files.append(file)
     if Data.DEBUG:
         Data.debug("后续迁移文件: \n" + str(continue_files[: Data.LIST_COUNT]))
-        Data.debug("后续迁移文件: \n" + str(continue_files[: Data.LIST_COUNT]))
         Data.debug("未迁移文件: \n" + str(out_second_files[: Data.LIST_COUNT]))
 
 
