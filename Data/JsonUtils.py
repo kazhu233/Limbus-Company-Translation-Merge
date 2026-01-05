@@ -21,6 +21,12 @@ def loadJson(path):
 def saveJson(path, json_data):
     if Data.DEBUG:
         Result.debug(f"正在保存json文件: {path}")
+    if not json_data:
+        if Data.DEBUG:
+            Result.debug(f"空文件,跳过")
+    if not json_data["dataList"]:
+        if Data.DEBUG:
+            Result.debug(f"空文件,跳过")
     with open(path, "w", encoding="utf-8-sig") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=4)
 
@@ -57,40 +63,36 @@ def dataCompare(path, path2):
     if not json_data:
         Data.empty_files.append(file_name)
         return (-1, "比较失败")
-    if not json_data2:
-        Data.empty_files.append(file_name)
-        return (-1, "比较失败")
-    # 循环判断
-    key = "dataList"
-    if key in json_data:
-        json_data_length = len(json_data[key])
-        json_data2_length = len(json_data2[key])
-        if json_data_length != json_data2_length:
-            equal_count = 0
-            for x in json_data[key]:
-                if "id" in x:
-                    id = x["id"]
-                    exists = any(id == data["id"] for data in json_data2[key])
-                    if exists:
-                        equal_count += 1
-                        Data.compare_files.append(file_name)
-                    else:
-                        Data.mismatch_data.append((file_name, x))
-                else:
-                    if json_data[key]:
-                        # 如果json_data不是空的
-                        if json_data[key][0]:
-                            json_data_length -= 1
-                            continue
-                            # 如果json_data[key]不是空的
-                    # 不匹配的加入不匹配表，
-                    Data.empty_files.append(file_name)
-            # 循环体结束
-            return (json_data_length, equal_count, "比较完成")
-        return (1, "长度相等")
-    else:
-        # 无dataList, 加入未处理文件
+    if not json_data["dataList"]:
         if Data.DEBUG:
             Result.debug(f"json无DataList: {file_name}")
         Data.unprocessed_files.append(file_name)
         return (0, "不比较")
+
+    # 循环判断
+    key = "dataList"
+    json_data_length = len(json_data[key])
+    json_data2_length = len(json_data2[key])
+    if json_data_length != json_data2_length:
+        equal_count = 0
+        for x in json_data[key]:
+            if "id" in x:
+                id = x["id"]
+                exists = any(id == data["id"] for data in json_data2[key])
+                if exists:
+                    equal_count += 1
+                    Data.compare_files.append(file_name)
+                else:
+                    Data.mismatch_data.append((file_name, x))
+            else:
+                if json_data[key]:
+                    # 如果json_data不是空的
+                    if json_data[key][0]:
+                        json_data_length -= 1
+                        continue
+                        # 如果json_data[key]不是空的
+                # 不匹配的加入不匹配表，
+                Data.empty_files.append(file_name)
+        # 循环体结束
+        return (json_data_length, equal_count, "比较完成")
+    return (1, "长度相等")
